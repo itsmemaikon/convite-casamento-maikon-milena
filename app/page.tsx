@@ -23,10 +23,15 @@ function useRevealSections(enabled: boolean) {
 
 const WRITING_INTERVAL = 145;
 const toPublicAsset = (path: string) => path.startsWith("/") ? `.${path}` : path;
-const splitGuestNames = (names: string) => names
-  .split(/\s*(?:,|;|\/|\+|&|\be\b)\s*/i)
-  .map((name) => name.trim())
-  .filter(Boolean);
+const splitGuestNames = (names: string) => {
+  const normalizedNames = names.trim();
+  const hasExplicitSeparator = /(?:,|;|\/|\+|&|\s+e\s+)/i.test(normalizedNames);
+
+  return (hasExplicitSeparator
+    ? normalizedNames.split(/\s*(?:,|;|\/|\+|&|\be\b)\s*/i)
+    : [normalizedNames]
+  ).map((name) => name.trim()).filter(Boolean);
+};
 
 function HandwrittenLine({ text, className, startDelay }: { text: string; className: string; startDelay: number }) {
   const words = text.trim().split(/\s+/);
@@ -253,9 +258,13 @@ function Invitation() {
   useRevealSections(opened);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const rawName = params.get(weddingData.guestQueryParam) ?? params.get("nome") ?? "";
-    const normalizedName = rawName.replace(/\s+/g, " ").trim().slice(0, 80);
-    const detectedPlural = /(?:\s+e\s+|&|[,;/+]|\bfam[ií]lia\b)/i.test(normalizedName);
+    const queryGuests = params.getAll(weddingData.guestQueryParam);
+    const fallbackGuests = queryGuests.length ? queryGuests : params.getAll("nome");
+    const normalizedGuests = fallbackGuests
+      .map((name) => name.replace(/\s+/g, " ").trim().slice(0, 80))
+      .filter(Boolean);
+    const normalizedName = normalizedGuests.join(", ");
+    const detectedPlural = normalizedGuests.length > 1 || splitGuestNames(normalizedName).length > 1 || /\bfam[ií]lia\b/i.test(normalizedName);
     const pluralParam = params.get("plural")?.trim().toLowerCase();
     const explicitPlural = pluralParam
       ? ["1", "true", "sim"].includes(pluralParam)
