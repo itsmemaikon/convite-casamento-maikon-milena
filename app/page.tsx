@@ -25,12 +25,25 @@ const WRITING_INTERVAL = 145;
 const toPublicAsset = (path: string) => path.startsWith("/") ? `.${path}` : path;
 
 function HandwrittenLine({ text, className, startDelay }: { text: string; className: string; startDelay: number }) {
+  const words = text.trim().split(/\s+/);
+  let characterOffset = 0;
+
   return <span className={`writing-line ${className}`} aria-hidden="true">
-    {Array.from(text).map((character, index) => <span
-      className="writing-character"
-      style={{ animationDelay: `${startDelay + index * WRITING_INTERVAL}ms` }}
-      key={`${character}-${index}`}
-    >{character === " " ? "\u00a0" : character}</span>)}
+    {words.map((word, wordIndex) => {
+      const wordStart = characterOffset;
+      characterOffset += word.length + 1;
+
+      return <span key={`${word}-${wordIndex}`}>
+        {wordIndex > 0 && " "}
+        <span className="writing-word">
+          {Array.from(word).map((character, index) => <span
+            className="writing-character"
+            style={{ animationDelay: `${startDelay + (wordStart + index) * WRITING_INTERVAL}ms` }}
+            key={`${character}-${index}`}
+          >{character}</span>)}
+        </span>
+      </span>;
+    })}
   </span>;
 }
 
