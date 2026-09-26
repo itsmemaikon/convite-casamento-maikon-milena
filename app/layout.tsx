@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Helena & Gabriel | Nosso casamento",
-  description: "Você está convidado para celebrar o casamento de Helena e Gabriel.",
+  title: "Milena & Maikon | Nosso casamento",
+  description: "Você está convidado para celebrar o casamento de Milena e Maikon.",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "./favicon.svg",
+    shortcut: "./favicon.svg",
   },
 };
 

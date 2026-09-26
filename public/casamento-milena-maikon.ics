@@ -1,0 +1,17 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Milena e Maikon//Convite de Casamento//PT-BR
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+BEGIN:VEVENT
+UID:casamento-milena-maikon-20270410@convite.local
+DTSTAMP:20260924T000000Z
+DTSTART;TZID=America/Sao_Paulo:20270410T180000
+DTEND;TZID=America/Sao_Paulo:20270410T230000
+SUMMARY:Casamento de Milena e Maikon
+DESCRIPTION:Você está convidado para celebrar o casamento de Milena e Maikon.
+LOCATION:Restaurante do Nego\, R. Fátima\, 504 - Itaum\, Joinville - SC\, 89230-183
+STATUS:CONFIRMED
+TRANSP:OPAQUE
+END:VEVENT
+END:VCALENDAR
