@@ -70,12 +70,12 @@ function EnvelopeIntro({ onOpen, guestName, guestReady, multipleGuests }: { onOp
     : helloStart + Array.from(helloText).length * WRITING_INTERVAL + 360;
 
   useEffect(() => {
-    setSparkles(Array.from({ length: 20 }, () => ({
+    setSparkles(Array.from({ length: 32 }, () => ({
       x: 4 + Math.random() * 92,
       y: 5 + Math.random() * 90,
-      size: 5 + Math.random() * 6,
-      delay: Math.random() * -6,
-      duration: 3.4 + Math.random() * 3.2,
+      size: 7 + Math.random() * 9,
+      delay: Math.random() * -5,
+      duration: 2.2 + Math.random() * 2.5,
     })));
   }, []);
   function openInvitation() {

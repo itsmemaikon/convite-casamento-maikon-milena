@@ -26,7 +26,7 @@ export const weddingData = {
   copy: {
     intro: {
       ariaLabel: "Abertura do convite",
-      greetingWithGuest: "Olá",
+      greetingWithGuest: "Olá!",
       greetingWithoutGuest: "Olá!",
       receivedSingle: "Você recebeu um convite",
       receivedMultiple: "Vocês receberam um convite",
