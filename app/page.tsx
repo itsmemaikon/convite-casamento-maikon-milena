@@ -23,6 +23,10 @@ function useRevealSections(enabled: boolean) {
 
 const WRITING_INTERVAL = 145;
 const toPublicAsset = (path: string) => path.startsWith("/") ? `.${path}` : path;
+const splitGuestNames = (names: string) => names
+  .split(/\s*(?:,|;|\/|\+|&|\be\b)\s*/i)
+  .map((name) => name.trim())
+  .filter(Boolean);
 
 function HandwrittenLine({ text, className, startDelay }: { text: string; className: string; startDelay: number }) {
   const words = text.trim().split(/\s+/);
@@ -53,6 +57,7 @@ function EnvelopeIntro({ onOpen, guestName, guestReady, multipleGuests }: { onOp
   const [letterInFront, setLetterInFront] = useState(false);
   const [sparkles, setSparkles] = useState<Array<{ x: number; y: number; size: number; delay: number; duration: number }>>([]);
   const helloText = guestName ? weddingData.copy.intro.greetingWithGuest : weddingData.copy.intro.greetingWithoutGuest;
+  const guestNames = splitGuestNames(guestName);
   const helloStart = 180;
   const nameStart = helloStart + Array.from(helloText).length * WRITING_INTERVAL + 260;
   const eyebrowStart = guestName
@@ -94,7 +99,12 @@ function EnvelopeIntro({ onOpen, guestName, guestReady, multipleGuests }: { onOp
       <div className={`intro-copy ${guestReady ? "is-ready" : ""}`}>
         <p className="intro-greeting" aria-label={guestName ? `${weddingData.copy.intro.greetingWithGuest} ${guestName}` : weddingData.copy.intro.greetingWithoutGuest}>
           <HandwrittenLine text={helloText} className="writing-hello" startDelay={helloStart} />
-          {guestName && <strong><HandwrittenLine text={guestName} className="writing-name" startDelay={nameStart} /></strong>}
+          {guestName && <strong className="intro-guest-names">
+            {guestNames.map((name, index) => {
+              const previousCharacters = guestNames.slice(0, index).reduce((total, previousName) => total + previousName.length + 1, 0);
+              return <HandwrittenLine key={`${name}-${index}`} text={name} className="writing-name" startDelay={nameStart + previousCharacters * WRITING_INTERVAL} />;
+            })}
+          </strong>}
         </p>
         <p className="intro-eyebrow" style={{ animationDelay: `${eyebrowStart}ms` }}>{multipleGuests ? weddingData.copy.intro.receivedMultiple : weddingData.copy.intro.receivedSingle}</p>
       </div>
