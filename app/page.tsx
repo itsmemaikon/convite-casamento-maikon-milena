@@ -1,151 +1,338 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CalendarPlus, Check, ChevronDown, ChevronLeft, ChevronRight, Clock3, ExternalLink, Heart, MapPin, Music2, Pause, Shirt, Sparkles } from "lucide-react";
+import {
+  CalendarPlus,
+  CalendarPlus2,
+  Check,
+  ClockFading,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  Clock3,
+  Gift,
+  GemIcon,
+  Heart,
+  MapPin,
+  MapPinned,
+  Music2,
+  Pause,
+  Shirt,
+  Sparkles,
+  Smartphone,
+} from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 import { weddingData } from "../data/wedding-data";
 
 function useRevealSections(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
     const items = document.querySelectorAll<HTMLElement>("[data-reveal]");
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("is-visible");
-          observer.unobserve(entry.target);
-        }
-      });
-    }, { threshold: 0.16, rootMargin: "0px 0px -6%" });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.16, rootMargin: "0px 0px -6%" },
+    );
     items.forEach((item) => observer.observe(item));
     return () => observer.disconnect();
   }, [enabled]);
 }
 
 const WRITING_INTERVAL = 145;
-const toPublicAsset = (path: string) => path.startsWith("/") ? `.${path}` : path;
+const toPublicAsset = (path: string) =>
+  path.startsWith("/") ? `.${path}` : path;
 const splitGuestNames = (names: string) => {
   const normalizedNames = names.trim();
   const hasExplicitSeparator = /(?:,|;|\/|\+|&|\s+e\s+)/i.test(normalizedNames);
 
-  return (hasExplicitSeparator
-    ? normalizedNames.split(/\s*(?:,|;|\/|\+|&|\be\b)\s*/i)
-    : [normalizedNames]
-  ).map((name) => name.trim()).filter(Boolean);
+  return (
+    hasExplicitSeparator
+      ? normalizedNames.split(/\s*(?:,|;|\/|\+|&|\be\b)\s*/i)
+      : [normalizedNames]
+  )
+    .map((name) => name.trim())
+    .filter(Boolean);
 };
 
-function HandwrittenLine({ text, className, startDelay }: { text: string; className: string; startDelay: number }) {
+function HandwrittenLine({
+  text,
+  className,
+  startDelay,
+}: {
+  text: string;
+  className: string;
+  startDelay: number;
+}) {
   const words = text.trim().split(/\s+/);
   let characterOffset = 0;
 
-  return <span className={`writing-line ${className}`} aria-hidden="true">
-    {words.map((word, wordIndex) => {
-      const wordStart = characterOffset;
-      characterOffset += word.length + 1;
+  return (
+    <span className={`writing-line ${className}`} aria-hidden="true">
+      {words.map((word, wordIndex) => {
+        const wordStart = characterOffset;
+        characterOffset += word.length + 1;
 
-      return <span key={`${word}-${wordIndex}`}>
-        {wordIndex > 0 && " "}
-        <span className="writing-word">
-          {Array.from(word).map((character, index) => <span
-            className="writing-character"
-            style={{ animationDelay: `${startDelay + (wordStart + index) * WRITING_INTERVAL}ms` }}
-            key={`${character}-${index}`}
-          >{character}</span>)}
-        </span>
-      </span>;
-    })}
-  </span>;
+        return (
+          <span key={`${word}-${wordIndex}`}>
+            {wordIndex > 0 && " "}
+            <span className="writing-word">
+              {Array.from(word).map((character, index) => (
+                <span
+                  className="writing-character"
+                  style={{
+                    animationDelay: `${startDelay + (wordStart + index) * WRITING_INTERVAL}ms`,
+                  }}
+                  key={`${character}-${index}`}
+                >
+                  {character}
+                </span>
+              ))}
+            </span>
+          </span>
+        );
+      })}
+    </span>
+  );
 }
 
-function EnvelopeIntro({ onOpen, guestName, guestReady, multipleGuests }: { onOpen: () => void; guestName: string; guestReady: boolean; multipleGuests: boolean }) {
+function EnvelopeIntro({
+  onOpen,
+  guestName,
+  guestReady,
+  multipleGuests,
+}: {
+  onOpen: () => void;
+  guestName: string;
+  guestReady: boolean;
+  multipleGuests: boolean;
+}) {
   const [opening, setOpening] = useState(false);
   const [flapBehind, setFlapBehind] = useState(false);
   const [letterInFront, setLetterInFront] = useState(false);
-  const [sparkles, setSparkles] = useState<Array<{ x: number; y: number; size: number; delay: number; duration: number }>>([]);
-  const helloText = guestName ? weddingData.copy.intro.greetingWithGuest : weddingData.copy.intro.greetingWithoutGuest;
+  const [sparkles, setSparkles] = useState<
+    Array<{
+      x: number;
+      y: number;
+      size: number;
+      delay: number;
+      duration: number;
+    }>
+  >([]);
+  const helloText = guestName
+    ? weddingData.copy.intro.greetingWithGuest
+    : weddingData.copy.intro.greetingWithoutGuest;
   const guestNames = splitGuestNames(guestName);
   const helloStart = 180;
-  const nameStart = helloStart + Array.from(helloText).length * WRITING_INTERVAL + 260;
+  const nameStart =
+    helloStart + Array.from(helloText).length * WRITING_INTERVAL + 260;
   const eyebrowStart = guestName
     ? nameStart + Array.from(guestName).length * WRITING_INTERVAL + 360
     : helloStart + Array.from(helloText).length * WRITING_INTERVAL + 360;
 
   useEffect(() => {
-    setSparkles(Array.from({ length: 32 }, () => ({
-      x: 4 + Math.random() * 92,
-      y: 5 + Math.random() * 90,
-      size: 7 + Math.random() * 9,
-      delay: Math.random() * -5,
-      duration: 2.2 + Math.random() * 2.5,
-    })));
+    setSparkles(
+      Array.from({ length: 32 }, () => ({
+        x: 4 + Math.random() * 92,
+        y: 5 + Math.random() * 90,
+        size: 7 + Math.random() * 9,
+        delay: Math.random() * -5,
+        duration: 2.2 + Math.random() * 2.5,
+      })),
+    );
   }, []);
   function openInvitation() {
     if (opening) return;
-    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     setOpening(true);
     window.setTimeout(() => setFlapBehind(true), reducedMotion ? 0 : 460);
     window.setTimeout(() => setLetterInFront(true), reducedMotion ? 0 : 640);
     window.setTimeout(onOpen, reducedMotion ? 80 : 1650);
   }
   return (
-    <section className={`intro ${opening ? "is-opening" : ""} ${flapBehind ? "flap-behind" : ""} ${letterInFront ? "letter-in-front" : ""}`} aria-label={weddingData.copy.intro.ariaLabel}>
+    <section
+      className={`intro ${opening ? "is-opening" : ""} ${flapBehind ? "flap-behind" : ""} ${letterInFront ? "letter-in-front" : ""}`}
+      aria-label={weddingData.copy.intro.ariaLabel}
+    >
       <div className="intro-glow" aria-hidden="true" />
       <div className="intro-sparkles" aria-hidden="true">
-        {sparkles.map((sparkle, index) => <span className="intro-sparkle" key={index} style={{
-          left: `${sparkle.x}%`,
-          top: `${sparkle.y}%`,
-          width: `${sparkle.size}px`,
-          height: `${sparkle.size}px`,
-          animationDelay: `${sparkle.delay}s`,
-          animationDuration: `${sparkle.duration}s`,
-        }} />)}
+        {sparkles.map((sparkle, index) => (
+          <span
+            className="intro-sparkle"
+            key={index}
+            style={{
+              left: `${sparkle.x}%`,
+              top: `${sparkle.y}%`,
+              width: `${sparkle.size}px`,
+              height: `${sparkle.size}px`,
+              animationDelay: `${sparkle.delay}s`,
+              animationDuration: `${sparkle.duration}s`,
+            }}
+          />
+        ))}
       </div>
-      <img className="intro-floral intro-floral-top" src="./flores-envelope.webp" alt="" aria-hidden="true" />
-      <img className="intro-floral intro-floral-bottom" src="./flores-envelope.webp" alt="" aria-hidden="true" />
+      <img
+        className="intro-floral intro-floral-top"
+        src="./flores-envelope.webp"
+        alt=""
+        aria-hidden="true"
+      />
+      <img
+        className="intro-floral intro-floral-bottom"
+        src="./flores-envelope.webp"
+        alt=""
+        aria-hidden="true"
+      />
       <div className={`intro-copy ${guestReady ? "is-ready" : ""}`}>
-        <p className="intro-greeting" aria-label={guestName ? `${weddingData.copy.intro.greetingWithGuest} ${guestName}` : weddingData.copy.intro.greetingWithoutGuest}>
-          <HandwrittenLine text={helloText} className="writing-hello" startDelay={helloStart} />
-          {guestName && <strong className="intro-guest-names">
-            {guestNames.map((name, index) => {
-              const previousCharacters = guestNames.slice(0, index).reduce((total, previousName) => total + previousName.length + 1, 0);
-              return <HandwrittenLine key={`${name}-${index}`} text={name} className="writing-name" startDelay={nameStart + previousCharacters * WRITING_INTERVAL} />;
-            })}
-          </strong>}
+        <p
+          className="intro-greeting"
+          aria-label={
+            guestName
+              ? `${weddingData.copy.intro.greetingWithGuest} ${guestName}`
+              : weddingData.copy.intro.greetingWithoutGuest
+          }
+        >
+          <HandwrittenLine
+            text={helloText}
+            className="writing-hello"
+            startDelay={helloStart}
+          />
+          {guestName && (
+            <strong className="intro-guest-names">
+              {guestNames.map((name, index) => {
+                const previousCharacters = guestNames
+                  .slice(0, index)
+                  .reduce(
+                    (total, previousName) => total + previousName.length + 1,
+                    0,
+                  );
+                return (
+                  <HandwrittenLine
+                    key={`${name}-${index}`}
+                    text={name}
+                    className="writing-name"
+                    startDelay={
+                      nameStart + previousCharacters * WRITING_INTERVAL
+                    }
+                  />
+                );
+              })}
+            </strong>
+          )}
         </p>
-        <p className="intro-eyebrow" style={{ animationDelay: `${eyebrowStart}ms` }}>{multipleGuests ? weddingData.copy.intro.receivedMultiple : weddingData.copy.intro.receivedSingle}</p>
+        <p
+          className="intro-eyebrow"
+          style={{ animationDelay: `${eyebrowStart}ms` }}
+        >
+          {multipleGuests
+            ? weddingData.copy.intro.receivedMultiple
+            : weddingData.copy.intro.receivedSingle}
+        </p>
       </div>
-      <button className="envelope-button" onClick={openInvitation} aria-label={weddingData.copy.intro.openAriaLabel}>
+      <button
+        className="envelope-button"
+        onClick={openInvitation}
+        aria-label={weddingData.copy.intro.openAriaLabel}
+      >
         <span className="envelope-scene" aria-hidden="true">
-          <span className="invitation-peek"><span className="peek-monogram">{weddingData.monogram}</span><span className="peek-date">{weddingData.shortDate}</span></span>
-          <span className="envelope-back" /><span className="envelope-letter" /><span className="envelope-front" /><span className="envelope-flap" />
-          <span className="wax-seal"><span>{weddingData.monogram}</span></span>
+          <span className="invitation-peek">
+            <span className="peek-monogram">{weddingData.monogram}</span>
+            <span className="peek-date">{weddingData.shortDate}</span>
+          </span>
+          <span className="envelope-back" />
+          <span className="envelope-letter" />
+          <span className="envelope-front" />
+          <span className="envelope-flap" />
+          <span className="wax-seal">
+            <span>{weddingData.monogram}</span>
+          </span>
         </span>
       </button>
-      <button className="open-hint" onClick={openInvitation} tabIndex={opening ? -1 : 0}>
-        <span>{weddingData.copy.intro.openHint}</span><ChevronDown size={17} strokeWidth={1.5} />
+      <button
+        className="button button-dark open-hint"
+        onClick={openInvitation}
+        tabIndex={opening ? -1 : 0}
+      >
+        <span>{weddingData.copy.intro.openHint}</span>
+        <ChevronDown size={17} strokeWidth={1.5} />
       </button>
     </section>
   );
 }
 
-function MusicControl({ playing, onToggle }: { playing: boolean; onToggle: () => void }) {
+function MusicControl({
+  playing,
+  onToggle,
+}: {
+  playing: boolean;
+  onToggle: () => void;
+}) {
   const hasMusic = Boolean(weddingData.music);
-  return <>
-    <button className={`music-control ${playing ? "is-playing" : ""}`} onClick={onToggle} disabled={!hasMusic}
-      aria-label={hasMusic ? (playing ? weddingData.copy.music.pauseAriaLabel : weddingData.copy.music.playAriaLabel) : weddingData.copy.music.unavailableAriaLabel}
-      title={hasMusic ? (playing ? weddingData.copy.music.pauseAriaLabel : weddingData.copy.music.playAriaLabel) : weddingData.copy.music.unavailableHint}>
-      {playing ? <Pause size={17} fill="currentColor" /> : <Music2 size={18} />}
-      <span>{hasMusic ? (playing ? weddingData.copy.music.playing : weddingData.copy.music.paused) : weddingData.copy.music.unavailable}</span>
-    </button>
-  </>;
+  return (
+    <>
+      <button
+        className={`music-control ${playing ? "is-playing" : ""}`}
+        onClick={onToggle}
+        disabled={!hasMusic}
+        aria-label={
+          hasMusic
+            ? playing
+              ? weddingData.copy.music.pauseAriaLabel
+              : weddingData.copy.music.playAriaLabel
+            : weddingData.copy.music.unavailableAriaLabel
+        }
+        title={
+          hasMusic
+            ? playing
+              ? weddingData.copy.music.pauseAriaLabel
+              : weddingData.copy.music.playAriaLabel
+            : weddingData.copy.music.unavailableHint
+        }
+      >
+        {playing ? (
+          <Pause size={17} fill="currentColor" />
+        ) : (
+          <Music2 size={18} />
+        )}
+        <span>
+          {hasMusic
+            ? playing
+              ? weddingData.copy.music.playing
+              : weddingData.copy.music.paused
+            : weddingData.copy.music.unavailable}
+        </span>
+      </button>
+    </>
+  );
 }
 
 function CalendarMark() {
-  return <div className="calendar-mark" aria-label={`${weddingData.date}, ${weddingData.time}`}>
-    <span>{weddingData.month}</span><strong>{weddingData.day}</strong><small>{weddingData.year}</small>
-  </div>;
+  return (
+    <div
+      className="calendar-mark"
+      aria-label={`${weddingData.date}, ${weddingData.time}`}
+    >
+      <span>{weddingData.month}</span>
+      <strong>{weddingData.day}</strong>
+      <small>{weddingData.year}</small>
+    </div>
+  );
 }
 
-type CountdownTime = { days: number; hours: number; minutes: number; seconds: number; finished: boolean };
+type CountdownTime = {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  finished: boolean;
+};
 
 function CountdownSection() {
   const [remaining, setRemaining] = useState<CountdownTime | null>(null);
@@ -175,17 +362,39 @@ function CountdownSection() {
     { label: weddingData.copy.countdown.seconds, value: remaining?.seconds },
   ];
 
-  return <section className="countdown-section section-pad" data-reveal aria-labelledby="countdown-title">
-    <p className="eyebrow">{weddingData.copy.countdown.eyebrow}</p>
-    <h2 id="countdown-title">{weddingData.copy.countdown.title}</h2>
-    <p className="countdown-intro">{weddingData.copy.countdown.intro}</p>
-    {remaining?.finished ? <p className="countdown-finished">{weddingData.copy.countdown.finished}</p> : <div className="countdown-grid" role="timer" aria-label={weddingData.copy.countdown.ariaLabel}>
-      {units.map((unit) => <div className="countdown-unit" key={unit.label}>
-        <strong>{unit.value === undefined ? "--" : String(unit.value).padStart(2, "0")}</strong>
-        <span>{unit.label}</span>
-      </div>)}
-    </div>}
-  </section>;
+  return (
+    <section
+      className="countdown-section section-pad"
+      data-reveal
+      aria-labelledby="countdown-title"
+    >
+      <p className="eyebrow">{weddingData.copy.countdown.eyebrow}</p>
+      <h2 id="countdown-title">{weddingData.copy.countdown.title}</h2>
+      <p className="countdown-intro">{weddingData.copy.countdown.intro}</p>
+      {remaining?.finished ? (
+        <p className="countdown-finished">
+          {weddingData.copy.countdown.finished}
+        </p>
+      ) : (
+        <div
+          className="countdown-grid"
+          role="timer"
+          aria-label={weddingData.copy.countdown.ariaLabel}
+        >
+          {units.map((unit) => (
+            <div className="countdown-unit" key={unit.label}>
+              <strong>
+                {unit.value === undefined
+                  ? "--"
+                  : String(unit.value).padStart(2, "0")}
+              </strong>
+              <span>{unit.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  );
 }
 
 function GallerySection() {
@@ -202,13 +411,25 @@ function GallerySection() {
     setActiveSlide(nextIndex);
     ignoreScrollRef.current = true;
     if (scrollResetRef.current) window.clearTimeout(scrollResetRef.current);
-    carouselRef.current?.scrollTo({ left: carouselRef.current.clientWidth * nextIndex, behavior: "smooth" });
-    scrollResetRef.current = window.setTimeout(() => { ignoreScrollRef.current = false; }, 500);
+    carouselRef.current?.scrollTo({
+      left: carouselRef.current.clientWidth * nextIndex,
+      behavior: "smooth",
+    });
+    scrollResetRef.current = window.setTimeout(() => {
+      ignoreScrollRef.current = false;
+    }, 500);
   }
 
   useEffect(() => {
-    if (images.length < 2 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const interval = window.setInterval(() => moveToSlide(activeSlideRef.current + 1), weddingData.copy.gallery.autoAdvanceMs);
+    if (
+      images.length < 2 ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    )
+      return;
+    const interval = window.setInterval(
+      () => moveToSlide(activeSlideRef.current + 1),
+      weddingData.copy.gallery.autoAdvanceMs,
+    );
     return () => {
       window.clearInterval(interval);
       if (scrollResetRef.current) window.clearTimeout(scrollResetRef.current);
@@ -225,27 +446,70 @@ function GallerySection() {
     setActiveSlide(nextIndex);
   }
 
-  return <section className="gallery-section section-pad" data-reveal aria-labelledby="gallery-title">
-    <p className="eyebrow">{weddingData.copy.gallery.eyebrow}</p>
-    <h2 id="gallery-title">{weddingData.copy.gallery.titleFirstLine}<br />{weddingData.copy.gallery.titleSecondLine}</h2>
-    <p className="gallery-intro">{weddingData.copy.gallery.intro}</p>
-    <div className="gallery-carousel" aria-label={weddingData.copy.gallery.carouselAriaLabel}>
-      <div className="gallery-track" ref={carouselRef} onScroll={updateActiveSlide}>
-        {images.map((image, index) => {
-          const caption = (image as { caption?: string }).caption;
-          return <figure className="gallery-slide" key={image.src + index} aria-label={`${weddingData.copy.gallery.slideLabelPrefix} ${index + 1} ${weddingData.copy.gallery.slideLabelMiddle} ${images.length}`}>
-            <img src={toPublicAsset(image.src)} alt={image.alt} loading={index === 0 ? "eager" : "lazy"} />
-            {caption && <figcaption>{caption}</figcaption>}
-          </figure>;
-        })}
+  return (
+    <section
+      className="gallery-section section-pad"
+      data-reveal
+      aria-labelledby="gallery-title"
+    >
+      <p className="eyebrow">{weddingData.copy.gallery.eyebrow}</p>
+      <h2 id="gallery-title">
+        {weddingData.copy.gallery.titleFirstLine}
+        <br />
+        {weddingData.copy.gallery.titleSecondLine}
+      </h2>
+      <p className="gallery-intro">{weddingData.copy.gallery.intro}</p>
+      <div
+        className="gallery-carousel"
+        aria-label={weddingData.copy.gallery.carouselAriaLabel}
+      >
+        <div
+          className="gallery-track"
+          ref={carouselRef}
+          onScroll={updateActiveSlide}
+        >
+          {images.map((image, index) => {
+            const caption = (image as { caption?: string }).caption;
+            return (
+              <figure
+                className="gallery-slide"
+                key={image.src + index}
+                aria-label={`${weddingData.copy.gallery.slideLabelPrefix} ${index + 1} ${weddingData.copy.gallery.slideLabelMiddle} ${images.length}`}
+              >
+                <img
+                  src={toPublicAsset(image.src)}
+                  alt={image.alt}
+                  loading={index === 0 ? "eager" : "lazy"}
+                />
+                {caption && <figcaption>{caption}</figcaption>}
+              </figure>
+            );
+          })}
+        </div>
+        {images.length > 1 && (
+          <div className="gallery-controls">
+            <button
+              type="button"
+              onClick={() => moveToSlide(activeSlide - 1)}
+              aria-label={weddingData.copy.gallery.previousSlide}
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <span aria-live="polite">
+              {activeSlide + 1} / {images.length}
+            </span>
+            <button
+              type="button"
+              onClick={() => moveToSlide(activeSlide + 1)}
+              aria-label={weddingData.copy.gallery.nextSlide}
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        )}
       </div>
-      {images.length > 1 && <div className="gallery-controls">
-        <button type="button" onClick={() => moveToSlide(activeSlide - 1)} aria-label={weddingData.copy.gallery.previousSlide}><ChevronLeft size={20} /></button>
-        <span aria-live="polite">{activeSlide + 1} / {images.length}</span>
-        <button type="button" onClick={() => moveToSlide(activeSlide + 1)} aria-label={weddingData.copy.gallery.nextSlide}><ChevronRight size={20} /></button>
-      </div>}
-    </div>
-  </section>;
+    </section>
+  );
 }
 
 function Invitation() {
@@ -259,12 +523,17 @@ function Invitation() {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const queryGuests = params.getAll(weddingData.guestQueryParam);
-    const fallbackGuests = queryGuests.length ? queryGuests : params.getAll("nome");
+    const fallbackGuests = queryGuests.length
+      ? queryGuests
+      : params.getAll("nome");
     const normalizedGuests = fallbackGuests
       .map((name) => name.replace(/\s+/g, " ").trim().slice(0, 80))
       .filter(Boolean);
     const normalizedName = normalizedGuests.join(", ");
-    const detectedPlural = normalizedGuests.length > 1 || splitGuestNames(normalizedName).length > 1 || /\bfam[ií]lia\b/i.test(normalizedName);
+    const detectedPlural =
+      normalizedGuests.length > 1 ||
+      splitGuestNames(normalizedName).length > 1 ||
+      /\bfam[ií]lia\b/i.test(normalizedName);
     const pluralParam = params.get("plural")?.trim().toLowerCase();
     const explicitPlural = pluralParam
       ? ["1", "true", "sim"].includes(pluralParam)
@@ -276,87 +545,208 @@ function Invitation() {
   }, []);
   const whatsappUrl = useMemo(() => {
     const phone = weddingData.whatsappNumber.replace(/\D/g, "");
-    return phone ? `https://wa.me/${phone}?text=${encodeURIComponent(weddingData.whatsappMessage)}` : "#";
+    return phone
+      ? `https://wa.me/${phone}?text=${encodeURIComponent(weddingData.whatsappMessage)}`
+      : "#";
   }, []);
 
   async function openEnvelope() {
     setOpened(true);
     if (weddingData.music && audioRef.current) {
-      try { await audioRef.current.play(); setPlaying(true); } catch { setPlaying(false); }
+      try {
+        await audioRef.current.play();
+        setPlaying(true);
+      } catch {
+        setPlaying(false);
+      }
     }
-    window.setTimeout(() => window.scrollTo({ top: 0, behavior: "instant" }), 20);
+    window.setTimeout(
+      () => window.scrollTo({ top: 0, behavior: "instant" }),
+      20,
+    );
   }
   async function toggleMusic() {
     const audio = audioRef.current;
     if (!audio) return;
-    if (audio.paused) { await audio.play(); setPlaying(true); }
-    else { audio.pause(); setPlaying(false); }
+    if (audio.paused) {
+      await audio.play();
+      setPlaying(true);
+    } else {
+      audio.pause();
+      setPlaying(false);
+    }
   }
 
-  return <><audio ref={audioRef} src={weddingData.music ? toPublicAsset(weddingData.music) : undefined} loop preload="none" />
-  {!opened ? <EnvelopeIntro onOpen={openEnvelope} guestName={guestName} guestReady={guestReady} multipleGuests={multipleGuests} /> : <main className="invitation-page">
-    <MusicControl playing={playing} onToggle={toggleMusic} />
-    <section className="hero" aria-labelledby="couple-name">
-      <div className="hero-photo-frame" aria-hidden="true">
-        <img className="hero-photo" src="./foto-casal.jpg" alt="" />
-      </div>
-      <div className="hero-arch" aria-hidden="true" />
-      <div className="hero-content">
-        <div className="monogram" aria-hidden="true">{weddingData.monogram}</div>
-        <p className="eyebrow">{weddingData.copy.hero.eyebrow}</p>
-        <h1 id="couple-name"><p>{weddingData.bride}</p><p>&amp;</p><p>{weddingData.groom}</p></h1>
-        <div className="gold-rule" aria-hidden="true"><Heart size={12} fill="currentColor" /></div>
-        <div>
-        <p className="hero-message">{weddingData.heroMessage1}</p>
-        <p className="hero-message">{weddingData.heroMessage2}</p>
-        </div>
-      </div>
-    </section>
+  return (
+    <>
+      <audio
+        ref={audioRef}
+        src={weddingData.music ? toPublicAsset(weddingData.music) : undefined}
+        loop
+        preload="none"
+      />
+      {!opened ? (
+        <EnvelopeIntro
+          onOpen={openEnvelope}
+          guestName={guestName}
+          guestReady={guestReady}
+          multipleGuests={multipleGuests}
+        />
+      ) : (
+        <main className="invitation-page">
+          <MusicControl playing={playing} onToggle={toggleMusic} />
+          <section className="hero" aria-labelledby="couple-name">
+            <div className="hero-photo-frame" aria-hidden="true">
+              <img className="hero-photo" src="./foto-casal.jpg" alt="" />
+            </div>
+            <div className="hero-arch" aria-hidden="true" />
+            <div className="hero-content">
+              <div className="monogram" aria-hidden="true">
+                {weddingData.monogram}
+              </div>
+              <p className="eyebrow">{weddingData.copy.hero.eyebrow}</p>
+              <h1 id="couple-name">
+                <p>{weddingData.bride}</p>
+                <p>&amp;</p>
+                <p>{weddingData.groom}</p>
+              </h1>
+              <div className="gold-rule" aria-hidden="true">
+                <Heart size={12} fill="currentColor" />
+              </div>
+              <div>
+                <p className="hero-message">{weddingData.heroMessage1}</p>
+                <p className="hero-message">{weddingData.heroMessage2}</p>
+              </div>
+            </div>
+          </section>
 
-    <section className="story-section section-pad" data-reveal>
-      <p className="eyebrow">{weddingData.copy.story.eyebrow}</p><h2>{weddingData.copy.story.titleFirstLine}<br />{weddingData.copy.story.titleSecondLine}</h2><p>{weddingData.invitationText}</p>
-      <div className="signature-mark" aria-hidden="true">{weddingData.monogram}</div>
-    </section>
+          <section className="story-section section-pad" data-reveal>
+            <p className="eyebrow">{weddingData.copy.story.eyebrow}</p>
+            <h2>
+              {weddingData.copy.story.titleFirstLine}
+              <br />
+              {weddingData.copy.story.titleSecondLine}
+            </h2>
+            <p>{weddingData.invitationText}</p>
+            <div className="signature-mark" aria-hidden="true">
+              {weddingData.monogram}
+            </div>
+          </section>
 
-    <GallerySection />
+          <section id="data" className="date-section section-pad" data-reveal>
+            <div className="date-card paper-card">
+              <CalendarMark />
+              <div className="date-copy">
+                <div></div>
+                <p className="eyebrow">{weddingData.copy.date.eyebrow}</p>
+                <h2>{weddingData.date}</h2>
+                <p className="time-line">{weddingData.time}</p>
+                <a
+                  className="button button-dark"
+                  href={toPublicAsset(weddingData.calendarFile)}
+                >
+                  <CalendarPlus2 size={20} />{" "}
+                  {weddingData.copy.date.calendarLink}
+                </a>
+              </div>
+            </div>
+          </section>
 
-    <section id="data" className="date-section section-pad" data-reveal><div className="date-card paper-card">
-      <CalendarMark /><div className="date-copy"><p className="eyebrow">{weddingData.copy.date.eyebrow}</p><h2>{weddingData.date}</h2><p className="time-line"><Clock3 size={18} /> {weddingData.time}</p>
-        <a className="calendar-link" href={toPublicAsset(weddingData.calendarFile)}><CalendarPlus size={18} /> {weddingData.copy.date.calendarLink}</a>
-      </div>
-    </div></section>
+          <CountdownSection />
 
-    <CountdownSection />
+          <section className="location-section section-pad" data-reveal>
+            <figure className="venue-photo-frame">
+              <img
+                src="./foto-local.jpg"
+                alt={`${weddingData.copy.location.photoAltPrefix} ${weddingData.venue}`}
+                loading="lazy"
+              />
+              {/* <figcaption>{weddingData.copy.location.photoCaption}</figcaption> */}
+            </figure>
+            <p className="eyebrow">{weddingData.copy.location.eyebrow}</p>
+            <h2>{weddingData.venue}</h2>
+            {weddingData.venueRoom && (
+              <p className="venue-room">{weddingData.venueRoom}</p>
+            )}
+            <p>{weddingData.address}</p>
+            <a
+              className="button button-light"
+              href={weddingData.mapsUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {weddingData.copy.location.mapsLink} <MapPin size={20} />
+            </a>
+          </section>
 
-    <section className="location-section section-pad" data-reveal>
-      <figure className="venue-photo-frame">
-        <img src="./foto-local.jpg" alt={`${weddingData.copy.location.photoAltPrefix} ${weddingData.venue}`} loading="lazy" />
-        <figcaption>{weddingData.copy.location.photoCaption}</figcaption>
-      </figure>
-      <div className="section-icon"><MapPin size={22} /></div><p className="eyebrow">{weddingData.copy.location.eyebrow}</p><h2>{weddingData.venue}</h2>{weddingData.venueRoom && <p className="venue-room">{weddingData.venueRoom}</p>}<p>{weddingData.address}</p>
-      <a className="button button-outline" href={weddingData.mapsUrl} target="_blank" rel="noreferrer">{weddingData.copy.location.mapsLink} <ExternalLink size={17} /></a>
-    </section>
+          <section className="details-section section-pad" data-reveal>
+            <p className="eyebrow">{weddingData.copy.details.eyebrow}</p>
+            <h2>{weddingData.copy.details.title}</h2>
+            <div className="details-grid">
+              {weddingData.details.map((detail, index) => (
+                <article className="detail-card" key={detail.title}>
+                  <span className="detail-number">0{index + 1}</span>
+                  <div className="detail-icon">
+                    {index === 0 ? (
+                      <Shirt size={21} />
+                    ) : index === 1 ? (
+                      <MapPin size={21} />
+                    ) : (
+                      <Gift size={21} />
+                    )}
+                  </div>
+                  <h3>{detail.title}</h3>
+                  <p>{detail.text}</p>
+                </article>
+              ))}
+            </div>
+          </section>
 
-    <section className="details-section section-pad" data-reveal><p className="eyebrow">{weddingData.copy.details.eyebrow}</p><h2>{weddingData.copy.details.title}</h2>
-      <div className="details-grid">{weddingData.details.map((detail, index) => <article className="detail-card" key={detail.title}>
-        <span className="detail-number">0{index + 1}</span><div className="detail-icon">{index === 0 ? <Shirt size={21} /> : index === 1 ? <MapPin size={21} /> : <Sparkles size={21} />}</div>
-        <h3>{detail.title}</h3><p>{detail.text}</p>
-      </article>)}</div>
-    </section>
+          <section className="rsvp-section section-pad" data-reveal>
+            <div className="rsvp-card paper-card">
+              <p className="eyebrow">{weddingData.copy.rsvp.eyebrow}</p>
+              <h2>{weddingData.copy.rsvp.title}</h2>
+              <p>{weddingData.copy.rsvp.intro}</p>
+              <a
+                className={`button button-dark ${!weddingData.whatsappNumber ? "is-disabled" : ""}`}
+                href={whatsappUrl}
+                target={weddingData.whatsappNumber ? "_blank" : undefined}
+                rel={weddingData.whatsappNumber ? "noreferrer" : undefined}
+                aria-disabled={!weddingData.whatsappNumber}
+                onClick={(event) => {
+                  if (!weddingData.whatsappNumber) event.preventDefault();
+                }}
+              >
+                {weddingData.whatsappNumber
+                  ? weddingData.copy.rsvp.confirmButton
+                  : weddingData.copy.rsvp.unavailableButton}
+                <FaWhatsapp size={20} />
+              </a>
+              {weddingData.rsvpDeadline && (
+                <small>
+                  {weddingData.copy.rsvp.deadlinePrefix}{" "}
+                  {weddingData.rsvpDeadline}.
+                </small>
+              )}
+            </div>
+          </section>
 
-    <section className="rsvp-section section-pad" data-reveal><div className="rsvp-card paper-card">
-      <div className="section-icon"><Check size={21} /></div><p className="eyebrow">{weddingData.copy.rsvp.eyebrow}</p><h2>{weddingData.copy.rsvp.title}</h2>
-      <p>{weddingData.copy.rsvp.intro}</p>
-      <a className={`button button-primary ${!weddingData.whatsappNumber ? "is-disabled" : ""}`} href={whatsappUrl}
-        target={weddingData.whatsappNumber ? "_blank" : undefined} rel={weddingData.whatsappNumber ? "noreferrer" : undefined}
-        aria-disabled={!weddingData.whatsappNumber} onClick={(event) => { if (!weddingData.whatsappNumber) event.preventDefault(); }}>
-        {weddingData.whatsappNumber ? weddingData.copy.rsvp.confirmButton : weddingData.copy.rsvp.unavailableButton}
-      </a>
-      {weddingData.rsvpDeadline && <small>{weddingData.copy.rsvp.deadlinePrefix} {weddingData.rsvpDeadline}.</small>}
-    </div></section>
+          <GallerySection />
 
-    <footer><Heart size={17} fill="currentColor" aria-hidden="true" /><p>{weddingData.footerMessage}</p><strong>{weddingData.bride} &amp; {weddingData.groom}</strong><span>{weddingData.year}</span></footer>
-  </main>}</>;
+          <footer>
+            <Heart size={17} fill="currentColor" aria-hidden="true" />
+            <p>{weddingData.footerMessage}</p>
+            <strong>
+              {weddingData.bride} &amp; {weddingData.groom}
+            </strong>
+            <span>{weddingData.year}</span>
+          </footer>
+        </main>
+      )}
+    </>
+  );
 }
 
-export default function Home() { return <Invitation />; }
+export default function Home() {
+  return <Invitation />;
+}
